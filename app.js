@@ -17,7 +17,7 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
  
  // Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
  let bot = new builder.UniversalBot(connector, (session) => {
-	 session.replaceDialog('greetingsInner');
+	 session.replaceDialog('pTypes');
  });
 
 // Simple waterfall
@@ -47,3 +47,55 @@ bot.dialog('askName', [
 		session.endDialogWithResult(results);
 	}
 ]);
+
+// Prompt types
+bot.dialog('pTypes', [
+	// Text prompt
+	(session) => {
+		builder.Prompts.text(session, 'What is your name?');
+	},
+	// Confirmation prompt
+	(session, results) => {
+		session.send(`Your name is ${results.response}.`);
+		builder.Prompts.confirm(session, 'Are you sure this is your name?');
+	},
+	// Number prompt
+	(session, results) => {
+		session.send(`You chose ${(results.response) ? ('yes') : ('no')}.`);
+		builder.Prompts.number(session, 'How many would you like to order?');
+	},
+	// Time prompt
+	(session, results) => {
+		session.send(`You chose ${results.response}.`);
+		builder.Prompts.time(session, "What time would you like to set an alarm for?");
+	},
+	// Choice prompt
+	(session, results) => {
+		session.send(`You chose ${results.response.entity}`);
+			builder.Prompts.choice(session, 'Which color do you prefer?', {
+				"west": {
+					units: 200,
+					total: "$6,000"
+				},
+				"central": {
+					units: 100,
+					total: "$3,000"
+				},
+				"east": {
+					units: 300,
+					total: "$9,000"
+				}
+			}
+			, { listStyle: 3 }
+		);
+		
+	}
+]);
+
+// The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
+bot.dialog('help', function (session, args, next) {
+    session.endDialog("Global help dialog. <br/>Please say 'next' to continue");
+})
+.triggerAction({
+    matches: /^help$/i,
+});
