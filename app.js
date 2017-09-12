@@ -17,5 +17,33 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
  
  // Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
  let bot = new builder.UniversalBot(connector, (session) => {
-	 session.send("You said: %s", session.message.text);
+	 session.replaceDialog('greetingsInner');
  });
+
+// Simple waterfall
+bot.dialog('greetings', [
+	(session) => {
+		builder.Prompts.text(session, 'hi! What i s your name?');
+	},
+	(session, results) => {
+		session.endDialog(`Hello ${results.response}!`);
+	}
+]);
+
+// More complicate waterfall
+bot.dialog('greetingsInner', [
+	(session) => {
+		session.beginDialog('askName');
+	},
+	(session, results) => {
+		session.endDialog(`Hello ${results.response}!`);
+	}
+]);
+bot.dialog('askName', [
+	(session) => {
+		builder.Prompts.text(session, 'Hi! What is your name?');
+	},
+	(session, results) => {
+		session.endDialogWithResult(results);
+	}
+]);
