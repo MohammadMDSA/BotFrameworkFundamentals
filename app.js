@@ -97,5 +97,18 @@ bot.dialog('help', function (session, args, next) {
     session.endDialog("Global help dialog. <br/>Please say 'next' to continue");
 })
 .triggerAction({
+    matches: /^help1$/i,
+});
+
+// Global help dialog with action
+bot.dialog('helpWhitAction', function (session, args, next) {
+    session.endDialog("Global help dialog. <br/>Please say 'next' to continue");
+})
+.triggerAction({
     matches: /^help$/i,
+    onSelectAction: (session, args, next) => {
+        // Add the help dialog to the dialog stack 
+        // (override the default behavior of replacing the stack)
+        session.beginDialog(args.action, args);
+    }
 });
