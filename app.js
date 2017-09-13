@@ -112,3 +112,20 @@ bot.dialog('helpWhitAction', function (session, args, next) {
         session.beginDialog(args.action, args);
     }
 });
+
+// Dialog to ask for number of people in the party
+bot.dialog('askForPartySize', [
+    function (session) {
+        builder.Prompts.text(session, "How many people are in your party?");
+    },
+    function (session, results) {
+       session.endDialogWithResult(results);
+    }
+])
+.beginDialogAction('partySizeHelpAction', 'partySizeHelp', { matches: /^help$/i });
+
+// Context Help dialog for party size
+bot.dialog('partySizeHelp', function(session, args, next) {
+    var msg = "Party size help: Our restaurant can support party sizes up to 150 members.";
+    session.endDialog(msg);
+});
