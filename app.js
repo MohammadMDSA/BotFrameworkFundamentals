@@ -90,7 +90,10 @@ bot.dialog('pTypes', [
 		);
 		
 	}
-]);
+])
+.triggerAction({
+	confirmPrompt: "This will cancel your current request. Are you sure?"	
+});
 
 // The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
 bot.dialog('help', function (session, args, next) {
@@ -128,4 +131,52 @@ bot.dialog('askForPartySize', [
 bot.dialog('partySizeHelp', function(session, args, next) {
     var msg = "Party size help: Our restaurant can support party sizes up to 150 members.";
     session.endDialog(msg);
+});
+
+// Replacing dialogs with confirmation
+bot.dialog('pTTypes', [
+	// Text prompt
+	(session) => {
+		builder.Prompts.text(session, 'What is your name?');
+	},
+	// Confirmation prompt
+	(session, results) => {
+		session.send(`Your name is ${results.response}.`);
+		builder.Prompts.confirm(session, 'Are you sure this is your name?');
+	},
+	// Number prompt
+	(session, results) => {
+		session.send(`You chose ${(results.response) ? ('yes') : ('no')}.`);
+		builder.Prompts.number(session, 'How many would you like to order?');
+	},
+	// Time prompt
+	(session, results) => {
+		session.send(`You chose ${results.response}.`);
+		builder.Prompts.time(session, "What time would you like to set an alarm for?");
+	},
+	// Choice prompt
+	(session, results) => {
+		session.send(`You chose ${results.response.entity}`);
+			builder.Prompts.choice(session, 'Which color do you prefer?', {
+				"west": {
+					units: 200,
+					total: "$6,000"
+				},
+				"central": {
+					units: 100,
+					total: "$3,000"
+				},
+				"east": {
+					units: 300,
+					total: "$9,000"
+				}
+			}
+			, { listStyle: 3 }
+		);
+		
+	}
+])
+.triggerAction({
+    matches: /^dinner reservation$/i,
+    confirmPrompt: "This will cancel your current request. Are you sure?"
 });
