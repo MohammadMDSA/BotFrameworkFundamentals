@@ -173,10 +173,22 @@ bot.dialog('pTTypes', [
 			}
 			, { listStyle: 3 }
 		);
-		
 	}
 ])
 .triggerAction({
     matches: /^dinner reservation$/i,
     confirmPrompt: "This will cancel your current request. Are you sure?"
 });
+
+// Ending Dialog with results(output)
+bot.dialog('orderDinner', [
+    //...waterfall steps...
+    // Last step
+    function(session, results){
+        if(results.response){
+            session.dialogData.room = results.response;
+            var msg = `Thank you. Your order will be delivered to room #${session.dialogData.room}`;
+            session.endConversation(msg);
+        }
+    }
+]);
