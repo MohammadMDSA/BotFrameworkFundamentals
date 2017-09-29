@@ -17,7 +17,7 @@ server.post('/api/messages', connector.listen());
 
 // Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
 let bot = new builder.UniversalBot(connector, (session) => {
-	session.replaceDialog('pTypes');
+	session.replaceDialog('First');
 });
 
 // Simple waterfall
@@ -96,7 +96,7 @@ bot.dialog('pTypes', [
 	});
 
 // The dialog stack is cleared and this dialog is invoked when the user enters 'help'.
-bot.dialog('help', function (session, args, next) {
+bot.dialog('help', (session, args, next) => {
 	session.endDialog("Global help dialog. <br/>Please say 'next' to continue");
 })
 	.triggerAction({
@@ -104,7 +104,7 @@ bot.dialog('help', function (session, args, next) {
 	});
 
 // Global help dialog with action
-bot.dialog('helpWhitAction', function (session, args, next) {
+bot.dialog('helpWhitAction', (session, args, next) => {
 	session.endDialog("Global help dialog. <br/>Please say 'next' to continue");
 })
 	.triggerAction({
@@ -128,8 +128,8 @@ bot.dialog('askForPartySize', [
 	.beginDialogAction('partySizeHelpAction', 'partySizeHelp', { matches: /^help$/i });
 
 // Context Help dialog for party size
-bot.dialog('partySizeHelp', function (session, args, next) {
-	var msg = "Party size help: Our restaurant can support party sizes up to 150 members.";
+bot.dialog('partySizeHelp', (session, args, next) => {
+	let msg = "Party size help: Our restaurant can support party sizes up to 150 members.";
 	session.endDialog(msg);
 });
 
@@ -184,10 +184,10 @@ bot.dialog('pTTypes', [
 bot.dialog('orderDinner', [
 	//...waterfall steps...
 	// Last step
-	function (session, results) {
+	(session, results) => {
 		if (results.response) {
 			session.dialogData.room = results.response;
-			var msg = `Thank you. Your order will be delivered to room #${session.dialogData.room}`;
+			let msg = `Thank you. Your order will be delivered to room #${session.dialogData.room}`;
 			session.endConversation(msg);
 		}
 	}
@@ -203,22 +203,22 @@ bot.dialog('dinnerOrder', [
 		matches: /^cancel$|^goodbye$/i,
 		confirmPrompt: "This will cancel your order. Are you sure?"
 	}
-	);
+);
 
 // Validating input using replaceDialog
 // This dialog prompts the user for a phone number. 
 // It will re-prompt the user if the input does not match a pattern for phone number.
 bot.dialog('phonePrompt', [
-	function (session, args) {
+	(session, args) => {
 		if (args && args.reprompt) {
 			builder.Prompts.text(session, "Enter the number using a format of either: '(555) 123-4567' or '555-123-4567' or '5551234567'")
 		} else {
 			builder.Prompts.text(session, "What's your phone number?");
 		}
 	},
-	function (session, results) {
-		var matched = results.response.match(/\d+/g);
-		var number = matched ? matched.join('') : '';
+	(session, results) => {
+		let matched = results.response.match(/\d+/g);
+		let number = matched ? matched.join('') : '';
 		if (number.length == 10 || number.length == 11) {
 			session.userData.phoneNumber = number; // Save the number.
 			session.endDialogWithResult({ response: number });
@@ -228,3 +228,26 @@ bot.dialog('phonePrompt', [
 		}
 	}
 ]);
+
+// CancelAction
+bot.dialog('First', [
+	(session) => {
+		session.send('starting...');
+		session.beginDialog('FirstWithCancel');
+	},
+	(session, results, next) => {
+		session.send('Still here');
+	}
+]);
+bot.dialog('FirstWithCancel', [
+	(session) => {
+		session.send('sdf');
+		builder.Prompts.text(session, 'Sample input');
+	},
+	(session, results, next) => {
+		session.send('done');
+	}
+])
+.cancelAction('FristCancelAction', 'Canceled', {
+	matches: /^cancel$/i
+});
