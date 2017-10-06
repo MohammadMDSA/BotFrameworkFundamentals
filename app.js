@@ -8,8 +8,8 @@ server.listen(process.env.port || process.env.PORT || 3978, () => {
 
 // Create chat connector for communicating with the Bot Framework Service
 let connector = new builder.ChatConnector({
-	appId: process.env.MICROSOFT_APP_ID,
-	appPassword: process.env.MICROSOFT_APP_PASSWORD
+	appId: '22c1ba29-61c8-4be1-ab68-1fdd1ab627cf',
+	appPassword: 'iFD1HuaBL6xbgj0GqCnzwDd'
 });
 
 // Listen for messages from users 
@@ -17,7 +17,7 @@ server.post('/api/messages', connector.listen());
 
 // Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
 let bot = new builder.UniversalBot(connector, (session) => {
-	session.replaceDialog('echoAttachment');
+	session.replaceDialog('showShirts');
 });
 
 // Simple waterfall
@@ -175,10 +175,10 @@ bot.dialog('pTTypes', [
 		);
 	}
 ])
-	.triggerAction({
-		matches: /^dinner reservation$/i,
-		confirmPrompt: "This will cancel your current request. Are you sure?"
-	});
+.triggerAction({
+	matches: /^dinner reservation$/i,
+	confirmPrompt: "This will cancel your current request. Are you sure?"
+});
 
 // Ending Dialog with results(output)
 bot.dialog('orderDinner', [
@@ -253,10 +253,10 @@ bot.dialog('FirstWithCancel', [
 });
 
 bot.dialog('echoAttachment', (session) => {
-	var msg = session.message;
+	let msg = session.message;
     if (msg.attachments && msg.attachments.length > 0) {
      // Echo back attachment
-     var attachment = msg.attachments[0];
+     let attachment = msg.attachments[0];
         session.send({
             text: "You sent:",
             attachments: [
@@ -271,4 +271,33 @@ bot.dialog('echoAttachment', (session) => {
         // Echo back users text
         session.send("You said: %s", session.message.text);
     }
+});
+
+
+// Sending a rich card
+bot.dialog('showShirts', (session) => {
+	let msg = new builder.Message(session);
+	msg.attachmentLayout(builder.AttachmentLayout.carousel);
+	msg.attachments([
+		new builder.HeroCard(session)
+			.title('Classic White T-Shirt')
+			.subtitle('100% Soft and luxurious Cotton')
+			.text('Price is $25 and carried in sizes (S, M, L and XL)')
+			.images([builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg')])
+			.buttons([
+				builder.CardAction.imBack(session, 'buy classic white t-shirt', 'Buy')
+			]),
+		new builder.HeroCard(session)
+			.title('Classic Gray T-Shirt')
+			.subtitle('100% Soft and Luxurious Cotton')
+			.text('Price is $25 and carried in sizes (S, M, L and XL)')
+			.images([builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg')])
+			.buttons([
+				builder.CardAction.imBack(session, 'buy classic gray t-shirt', 'Buy')
+			])
+	]);
+	session.send(msg).endDialog();
+})
+.triggerAction({
+	matches: /^(show|list)/i
 });
