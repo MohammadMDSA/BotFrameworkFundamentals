@@ -17,13 +17,13 @@ server.post('/api/messages', connector.listen());
 
 // Receive messages from the user and respond by echoing each message back (prefixed with 'You said:')
 let bot = new builder.UniversalBot(connector, (session) => {
-	session.replaceDialog('showShirts');
+	session.replaceDialog('proactiveDialog');
 });
 
 // Simple waterfall
 bot.dialog('greetings', [
 	(session) => {
-		builder.Prompts.text(session, 'hi! What i s your name?');
+		builder.Prompts.text(session, 'hi! What is your name?');
 	},
 	(session, results) => {
 		session.endDialog(`Hello ${results.response}!`);
@@ -273,7 +273,6 @@ bot.dialog('echoAttachment', (session) => {
     }
 });
 
-
 // Sending a rich card
 bot.dialog('showShirts', (session) => {
 	let msg = new builder.Message(session);
@@ -295,9 +294,42 @@ bot.dialog('showShirts', (session) => {
 			.buttons([
 				builder.CardAction.imBack(session, 'buy classic gray t-shirt', 'Buy')
 			])
-	]);
-	session.send(msg).endDialog();
-})
-.triggerAction({
-	matches: /^(show|list)/i
-});
+		]);
+		session.send(msg).endDialog();
+	})
+	.triggerAction({
+		matches: /^(show|list)/i
+	});
+	
+// Sending a proactive message
+let startProactiveDialog = (address) => {
+	// bot.send(`Inside func with address ${address}`);
+	bot.beginDialog(address, "*:survey");
+}
+bot.dialog('proactiveDialog', [
+	(session, args) => {
+		builder.Prompts.text(session, 'Give me your address');
+	},
+	(session, results) => {
+		let message = 'Hey there, I\'m going to interrupt our conversation and start a survey in five seconds...';
+		session.send(message);
+	
+		message = `You can also make me send a message by accessing: http://localhost:${server.address().port}/api/CustomWebApi`;
+		session.send(message);
+	
+		let temp = results.response;
+		setTimeout((temp) => {
+			session.send('Invoking function');
+			startProactiveDialog(temp);
+		}, 5000);
+		
+		message = 'Something after the timer';
+		session.endDialog(message);
+	}
+]);
+bot.dialog('survey', [
+	(session, args) => {
+		session.send('Inside test');
+		session.send(args);
+	}
+]);
