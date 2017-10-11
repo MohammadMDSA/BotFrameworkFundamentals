@@ -276,15 +276,17 @@ bot.dialog('echoAttachment', (session) => {
 // Sending a rich card
 bot.dialog('showShirts', (session) => {
 	let msg = new builder.Message(session);
+	// msg.attachmentLayout(builder.AttachmentLayout.list);
 	msg.attachmentLayout(builder.AttachmentLayout.carousel);
 	msg.attachments([
 		new builder.HeroCard(session)
 			.title('Classic White T-Shirt')
 			.subtitle('100% Soft and luxurious Cotton')
 			.text('Price is $25 and carried in sizes (S, M, L and XL)')
-			.images([builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg')])
+			.images([builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg'), builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg')])
 			.buttons([
-				builder.CardAction.imBack(session, 'buy classic white t-shirt', 'Buy')
+				builder.CardAction.imBack(session, 'buy classic white t-shirt', 'Buy'),
+				builder.CardAction.imBack(session, 'buy classic white t-shirt', 'SS')
 			]),
 		new builder.HeroCard(session)
 			.title('Classic Gray T-Shirt')
@@ -292,14 +294,14 @@ bot.dialog('showShirts', (session) => {
 			.text('Price is $25 and carried in sizes (S, M, L and XL)')
 			.images([builder.CardImage.create(session, 'http://i1-news.softpedia-static.com/images/fitted/340x180/Google-s-New-Year-Doodle-2000-2009-PIcs.jpg')])
 			.buttons([
-				builder.CardAction.imBack(session, 'buy classic gray t-shirt', 'Buy')
+				builder.CardAction.postBack(session, 'list', 'Buy')
 			])
-		]);
-		session.send(msg).endDialog();
-	})
-	.triggerAction({
-		matches: /^(show|list)/i
-	});
+	]);
+	session.send(msg).endDialog();
+})
+.triggerAction({
+	matches: /^(show|list)/i
+});
 	
 // Sending a proactive message
 let startProactiveDialog = (address) => {
